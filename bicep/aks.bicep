@@ -8,7 +8,7 @@ var name = 'bicepgoat'
 
 resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
   name: '${name}-aks-${env}'
-  location: location
+  location: location 
 
   identity: {
     type: 'SystemAssigned'
