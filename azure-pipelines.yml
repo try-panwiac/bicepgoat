@@ -8,15 +8,34 @@ pr:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- checkout: self
-- script: |
-    echo "Running Checkov Scan!"
-    sudo apt-get install software-properties-common
-    sudo add-apt-repository ppa:deadsnakes/ppa
-    sudo apt install python3-pip
-    sudo apt-get install python3-testresources
-    sudo python3.7 -m pip install botocore==1.20.112
-    sudo python3.7 -m pip install -U checkov
-    checkov -d .
-  displayName: 'IaC code scan using Checkov'
+stages:
+  - stage: Scan
+    displayName: Scan
+    jobs:
+      - job: plan
+        pool:
+          vmImage: ubuntu-latest
+        displayName: Checkov scan
+        steps:
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: 'pip install checkov'
+          displayName: Install checkov
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(System.DefaultWorkingDirectory)            
+            script: 'checkov -d . -o junitxml > Checkov-Report.xml'
+          continueOnError: true
+          displayName: Checkov scan
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'JUnit'
+            searchFolder: '$(System.DefaultWorkingDirectory)'
+            testResultsFiles: '**/*Checkov-Report.xml'
+            mergeTestResults: false
+            testRunTitle: Checkov Dev workspace scan
+            failTaskOnFailedTests: false
+            publishRunAttachments: true
+          displayName: Publish Test Result
