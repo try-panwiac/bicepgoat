@@ -7,9 +7,9 @@ pr:
 pool:
   vmImage: ubuntu-latest
 
-variables:
-- name: PRISMA_API_URL
-  value: https://api.prismacloud.io
+#variables:
+#- name: PRISMA_API_URL
+#  value: https://api.prismacloud.io
 
 steps:
 - task: AzureKeyVault@2
@@ -27,6 +27,8 @@ steps:
 - script: checkov -d . --bc-api-key $(prisma-access-key)::$(prisma-secret-key) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
   displayName: 'Scan with Prisma Cloud'
   continueOnError: true
+  env:
+    PRISMA_API_URL: https://api.prismacloud.io
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
