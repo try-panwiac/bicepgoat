@@ -3,10 +3,17 @@ trigger:
 
 pr:
 - main
- 
 
 pool:
   vmImage: ubuntu-latest
+
+variables:
+- name: PRISMA_API_URL
+  value: https://api3.prismacloud.io
+- name: prisma_access_key
+  value: b8e1ba6f-3b6b-4380-b684-b3d57e228e7b
+- name: prisma_secret_key
+  value: 9EUDX9CVB3A9g3HqJ4jy2BzL7+c=
 
 stages:
   - stage: Scan
@@ -17,25 +24,21 @@ stages:
           vmImage: ubuntu-latest
         displayName: Checkov scan
         steps:
-        - task: Bash@3
+        - task: UsePythonVersion@0
           inputs:
-            targetType: 'inline'
-            script: 'pip install checkov'
-          displayName: Install checkov
-        - task: Bash@3
-          inputs:
-            targetType: 'inline'
-            workingDirectory: $(System.DefaultWorkingDirectory)            
-            script: 'checkov -d . -o junitxml > Checkov-Report.xml'
-          continueOnError: true
-          displayName: Checkov scan
+            versionSpec: '3.8'
+          displayName: 'Install Python 3.8'
+        - script: pip install checkov
+          displayName: 'Install Checkov'
+        - script: checkov -d . --bc-api-key <prisma_access_key>::<prisma_secret_key> --repo-id try-panwiac/bicepgoat --branch main -o junitxml > prismareport.xml
+          displayName: 'Scan with Prisma Cloud'
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'JUnit'
             searchFolder: '$(System.DefaultWorkingDirectory)'
-            testResultsFiles: '**/*Checkov-Report.xml'
+            testResultsFiles: '**/*prismaresults.xml'
             mergeTestResults: false
-            testRunTitle: Checkov Dev workspace scan
+            testRunTitle: Prisma Cloud workspace scan
             failTaskOnFailedTests: false
             publishRunAttachments: true
           displayName: Publish Test Result
