@@ -26,6 +26,7 @@ steps:
   displayName: 'Install Checkov'
 - script: checkov -d . --bc-api-key $(prisma-access-key)::$(prisma-secret-key) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
   displayName: 'Scan with Prisma Cloud'
+  continueOnError: true
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
