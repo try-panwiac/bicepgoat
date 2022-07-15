@@ -9,7 +9,7 @@ pool:
 
 variables:
 - name: PRISMA_API_URL
-  value: https://api3.prismacloud.io
+  value: https://api.prismacloud.io
 - name: prisma_access_key
   value: b8e1ba6f-3b6b-4380-b684-b3d57e228e7b
 - name: prisma_secret_key
