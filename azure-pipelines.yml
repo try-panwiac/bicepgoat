@@ -30,7 +30,7 @@ stages:
           displayName: 'Install Python 3.8'
         - script: pip install checkov
           displayName: 'Install Checkov'
-        - script: checkov -d . --bc-api-key <prisma_access_key>::<prisma_secret_key> --repo-id try-panwiac/bicepgoat --branch main -o junitxml > prismareport.xml
+        - script: checkov -d . --bc-api-key $(prisma_access_key)::$(prisma_secret_key) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
           displayName: 'Scan with Prisma Cloud'
         - task: PublishTestResults@2
           inputs:
