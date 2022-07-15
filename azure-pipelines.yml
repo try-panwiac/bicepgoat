@@ -10,35 +10,32 @@ pool:
 variables:
 - name: PRISMA_API_URL
   value: https://api.prismacloud.io
-- name: prisma_access_key
-  value: b8e1ba6f-3b6b-4380-b684-b3d57e228e7b
-- name: prisma_secret_key
-  value: 9EUDX9CVB3A9g3HqJ4jy2BzL7+c=
 
-stages:
-  - stage: Scan
-    displayName: Scan
-    jobs:
-      - job: plan
-        pool:
-          vmImage: ubuntu-latest
-        displayName: Checkov scan
-        steps:
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '3.8'
-          displayName: 'Install Python 3.8'
-        - script: pip install checkov
-          displayName: 'Install Checkov'
-        - script: checkov -d . --bc-api-key $(prisma_access_key)::$(prisma_secret_key) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
-          displayName: 'Scan with Prisma Cloud'
-        - task: PublishTestResults@2
-          inputs:
-            testResultsFormat: 'JUnit'
-            searchFolder: '$(System.DefaultWorkingDirectory)'
-            testResultsFiles: '**/*prismaresults.xml'
-            mergeTestResults: false
-            testRunTitle: Prisma Cloud workspace scan
-            failTaskOnFailedTests: false
-            publishRunAttachments: true
-          displayName: Publish Test Result
+steps:
+- task: AzureKeyVault@2
+  inputs:
+    connectedServiceName: 'Azure subscription 1'
+    keyVaultName: 'ts-pipeline-vault'
+    secretsFilter: '*'
+    runAsPreJob: false
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+  displayName: 'Install Python 3.8'
+- script: pip install checkov
+  displayName: 'Install Checkov'
+- script: checkov -d . --bc-api-key $(prisma-ak)::$(prisma-sk) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
+  displayName: 'Scan with Prisma Cloud'
+  env:
+    prisma-ak: $(prisma-access-key)
+    prisma-sk: $(prisma-secret-key)
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    testResultsFiles: '**/*prismaresults.xml'
+    mergeTestResults: false
+    testRunTitle: Prisma Cloud workspace scan
+    failTaskOnFailedTests: false
+    publishRunAttachments: true
+  displayName: Publish Test Result
