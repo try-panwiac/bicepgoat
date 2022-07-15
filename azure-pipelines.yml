@@ -24,18 +24,7 @@ steps:
   displayName: 'Install Python 3.8'
 - script: pip install checkov
   displayName: 'Install Checkov'
-- script: checkov -d . --bc-api-key $(prisma-access-key)::$(prisma-secret-key) --repo-id "try-panwiac/bicepgoat" --branch main -o junitxml > prismareport.xml
+- script: checkov -d . --bc-api-key $(prisma-access-key)::$(prisma-secret-key) --repo-id prismaiac/bicepgoat --branch main
   displayName: 'Scan with Prisma Cloud'
-  continueOnError: true
   env:
     PRISMA_API_URL: https://api.prismacloud.io
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'JUnit'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    testResultsFiles: '**/*prismaresults.xml'
-    mergeTestResults: false
-    testRunTitle: Prisma Cloud workspace scan
-    failTaskOnFailedTests: false
-    publishRunAttachments: true
-  displayName: Publish Test Result
